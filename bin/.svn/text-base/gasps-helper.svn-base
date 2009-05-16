@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# != 0 ]; then
+  echo -e 'gasps is a very simple glue script which
+runs hasps and pipes its output into a Haskell interpreter.'
+else
+  $(dirname "$0")/hasps-helper | hugs $(dirname "$0")/../src/std-hasp.hs
+fi
+

@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 25
+/svn/!svn/ver/2/trunk/src
+END
+acc-file.scm
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/6/trunk/src/acc-file.scm
+END
+macros.scm
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/68/trunk/src/macros.scm
+END
+preload.scm
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/42/trunk/src/preload.scm
+END
+sugar-read.scm
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/68/trunk/src/sugar-read.scm
+END
+acc-term.scm
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/6/trunk/src/acc-term.scm
+END
+hasp.scm
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/73/trunk/src/hasp.scm
+END
+std-hasp.hs
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/73/trunk/src/std-hasp.hs
+END
+usr-macros.scm
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/68/trunk/src/usr-macros.scm
+END
+std-hasp.hasp
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/73/trunk/src/std-hasp.hasp
+END
+std-macros.scm
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/71/trunk/src/std-macros.scm
+END
+load-file.scm
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/73/trunk/src/load-file.scm
+END

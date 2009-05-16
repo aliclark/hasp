@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ $# != 0 ]; then
+  echo 'hasps is a simple script which takes a Hasp expression as input
+followed by a blank line, and outputs Haskell code on a single line.
+hasps is intended for testing Hasp code at the REPL,
+and the output of hasps can be conveniently piped into a Haskell interpreter
+(this is exactly what the gasps script does).
+eg. hasps | ghci
+'
+else
+  $(dirname "$0")/hasp-build-load-file
+
+  gsi $(dirname "$0")/../src/preload.scm $(dirname "$0")/../src/sugar-read.scm $(dirname "$0")/../src/load-file.scm $(dirname "$0")/../src/acc-term.scm
+fi
+

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ -z $(type -p rlwrap) ]]; then
+  $(dirname "$0")/gasps-helper
+else
+  rlwrap $(dirname "$0")/gasps-helper
+fi
+

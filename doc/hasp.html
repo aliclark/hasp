@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hasp Docs</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <h1>Hasp Documentation</h1>
+    <p>Hasp is an s-expression to Haskell compiler.</p>
+    <div class="toc">
+      <div class="toc-section">
+        <ul>
+          <li><a href="#about">About</a></li><li><a href="#how">How it works</a></li><li><a href="#why">Why use it</a></li><li><a href="#macros">Macros</a></li><li><a href="#comparisons">Comparisons to Liskell</a></li><li><a href="#philosophy">Philosophy</a></li><li><a href="#indentation">Indentation</a></li>
+        </ul>
+      </div>
+      <div class="toc-section">
+        <ul>
+          <li><a href="#limitations">Limitations</a></li><li><a href="#download">Download</a></li><li><a href="#installation">Installation</a></li><li><a href="#blog">Blog</a></li><li><a href="#tutorial">Tutorial</a></li><li><a href="#notes">Notes</a></li><li><a href="#todo">Todo</a></li><li><a href="#bugs">Bugs</a></li><li><a href="#credits">Credits</a></li>
+        </ul>
+      </div>
+      <div class="toc-section">
+        <ul>
+          <li><a href="#statements">Statements</a></li><li><a href="#expressions">Expressions</a></li><li><a href="#typexes">Typexes</a></li><li><a href="#generals">General</a></li><li><a href="#hooks">Hooks</a></li><li><a href="#comments">Comments</a></li><li><a href="#std-macros">Standard Macros</a></li><li><a href="#haskell">Standard Haskell</a></li><li><a href="#reader">Indentation Reader</a></li>
+        </ul>
+      </div>
+      <div class="toc-section">
+        <ul>
+          <li><a href="#scripts">Scripts</a></li><li><a href="#sources">Source files</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="section" id="about">
+      <h2>About Hasp</h2>
+      <p>
+        The goal of Hasp is to combine the best features of the two best languages on the planet - Haskell and Lisp.
+        Haskell is a strongly typed, lazy, functional language that many people find excellent for quickly developing defect-free software.
+        Lisp has the best macro functionality of any language, due to everything in Lisp being a list.
+        In combining the two, we get Hasp, a language with programmable syntax and pure semantics.
+      </p>
+    </div>
+    <div class="section" id="how">
+      <h2>How it works</h2>
+      <p>
+        Hasp supplies two <a href="#scripts">scripts</a> to convert your Hasp code to Haskell: <a href="#hasps">hasps</a> and <a href="#fasps">fasps</a>.
+        <a href="#hasps">hasps</a> reads Hasp expressions from standard input and prints the resulting Haskell code to standard output, with any newlines removed.
+        <a href="#fasps">fasps</a> does exactly the same, but instead of reading until it hits a newline,
+        it keeps reading until it has started reading the next form,
+        and the output it produces can contain newlines.
+      </p>
+      <p>
+        <a href="#hasps">hasps</a> is inteded for piping into Haskell interpreters,
+        where you manually enter expressions and want to produce a single line of Haskell code.
+        The script <a href="#gasps">gasps</a> does exactly this - it will start up your Haskell interpreter, piping the output from <a href="#hasps">hasps</a> as its input.
+        <a href="#fasps">fasps</a> is intended for compiling files at the command line. If you wanted to compile a file <code>foo.hasp</code> to <code>foo.hs</code>, you would type:
+      </p>
+      <pre>$ <a href="#fasps">fasps</a> &lt; foo.hasp &gt; foo.hs</pre>
+      <p>
+        Hasp forms are very similar to their Haskell counterparts and most share the same name.
+        Here are some quick examples.
+      </p>
+      <p>
+        If you were to compile the following file with <a href="#fasps">fasps</a>:
+      </p>
+<pre>
+(<a href="#deft">deft</a> main (IO ()) (<a href="#let-def">let=</a> (x 4) (print (* 2 x))))
+</pre>
+        <p>You would get this as output:</p>
+<pre>
+main :: IO ();
+main = (let {
+    x = 4;
+  } in (print ((*) 2 x)));
+</pre>
+      <p>Factorial in Hasp:</p>
+<pre>
+(<a href="#defn">defn</a> fact (<a href="#right-arrow">-></a> Integer Integer)
+  ((0) 1)
+  ((n) (* n (fact (<a href="#dec">dec</a> n)))))
+</pre>
+      <p>Compiled with <a href="#fasps">fasps</a>:</p>
+<pre>
+fact :: ((->) Integer Integer);
+fact = (\s_gensym_v_0 -> (case (s_gensym_v_0) of {
+  (0) -> 1;
+  (n) -> ((*) n (fact (<a href="#dec">dec</a> n)));}));
+</pre>
+      <p>
+        Hasp puts parenthesis around the forms because it doesn't know about Haskell's precedence rules,
+        and it prints semi-colons after statements to allow multiple statements on the same line.
+      </p>
+      <p>
+        You can also see that Hasp outputs <code>((*) n ...)</code> instead of <code>(n * ...)</code>.
+        This is not the result of some weird prefix fetish, but is implemented this way so <code>*</code> is a first-class value in Hasp just like any other,
+        whereas for Haskell you have to wrap it in parenthesis eg. <code>(*)</code> for it to be first-class.
+      </p>
+    </div>
+    <div class="section" id="why">
+      <h2>Why use it</h2>
+      <p>
+        By using the Lisp syntax, macros are much easier to write (for the uninitiated, <a href="http://www.defmacro.org/ramblings/lisp.html">this article</a> may give a taster for why macros are useful. You can also take a quick look at the macros provided as <a href="#std-macros">standard</a> with Hasp for some examples of what we found them useful for).
+        Currently <a href="http://www.haskell.org/th/">Template Haskell</a> can be used to write Haskell macros, however these are quite hard to write, since it has to deal with a non-list syntax.
+      </p>
+      <p>
+        Additionally, editors such as Emacs have very powerful functions that can be used to manipulate s-expressions, which aren't available for normal Haskell syntax.
+      </p>
+      <p>
+        Hasp integrates with your interpreter, you can type <code>(<a href="#hload">:hload</a> "foo.hasp")</code> at the <a href="#gasps">gasps</a> prompt to compile and load a Hasp file in one step.
+      </p>
+      <p>
+        If you dislike some things about Haskell syntax you may want to use Hasp for a cleaner and simpler syntax.
+      </p>
+      <p>
+        Unlike Haskell, Hasp has a notion of a "top level" - it can remember definitions you've previously made.
+        This makes it much easier to follow along incrementally entering code from a blog post and allows for more rapid development.
+        See this <a href="http://hasp-code.blogspot.com/2009/03/adding-top-level-to-hasp.html">blog post</a>
+        and <a href="http://hasp-code.blogspot.com/2009/03/top-level-part-2.html">this one</a> for more details.
+      </p>
+    </div>
+    <div class="section" id="macros">
+      <h2>Macros</h2>
+      <p>
+        The files <a href="#std-macros.scm">std-macros.scm</a> and <a href="#usr-macros.scm">usr-macros.scm</a> are intended to hold <a href="#std-macros">macros</a>.
+        Having this structure prevents Hasp files from filling up with thow-away macros
+        and keeps the macro language entirely separate from the Hasp language (the macro language is Scheme).
+        Any Scheme code is valid in these files, so you can write your macros in other files and use Scheme's load procedure to include them.
+        Both <a href="#std-macros.scm">std-macros.scm</a> and <a href="#usr-macros.scm">usr-macros.scm</a> are automatically loaded by <a href="#hasps">hasps</a> and <a href="#fasps">fasps</a> when they are run.
+      </p>
+      <p>Here is an example macro from <a href="#std-macros.scm">std-macros.scm</a>:</p>
+<pre>
+(defmac (<a href="#let-do">let&gt;&gt;=</a> definitions . forms)
+  (if (or (null? definitions) (null? (cdr definitions)))
+    `(<a href="#let">let</a> ,(butlast forms) ,(last forms))
+    `(&gt;&gt;= ,(cadr definitions)
+      (<a href="#fn">fn</a> (,(car definitions)) (<a href="#let-do">let&gt;&gt;=</a> ,(cddr definitions) ,@forms)))))
+</pre>
+      <p>And here is how you could use it in Hasp code:</p>
+<pre>
+(<a href="#let-do">let&gt;&gt;=</a> (myfile (readfilei "test")
+         a (myfile 0)
+         b (myfile 1))
+  (print (<a href="#tup">tup</a> a b)))
+</pre>
+      <p>Which outputs the following Haskell code:</p>
+<pre>
+((&gt;&gt;=) (readfilei "test") (\myfile -&gt; ((&gt;&gt;=) (myfile 0) (\a -&gt; ((&gt;&gt;=) (myfile 1) (\b -&gt; (print (a, b))))))))
+</pre>
+      <p>This is the Hasp equivalent of do-notation.</p>
+      <p>
+        Unlike normal macro-programming in Scheme, which has a distinction between macro-time and runtime,
+        for Hasp, Scheme is macro-time, so you can define Scheme procedures along with your Hasp macros
+        and they'll be available when the macro is expanded.
+        Hasp also provides the Scheme procedures <code>gens</code> and <code>gent</code> for generating random variable and type names
+        respectively.
+      </p>
+    </div>
+    <div class="section" id="comparisons">
+      <h2>Comparisons to Liskell</h2>
+      <p>
+        <a href="http://liskell.org/">Liskell</a> is another approach to allowing Lisp-like metaprogramming for Haskell.
+        The Hasp project initially started when Liskell's website went down,
+        but Hasp is here to stay because it uses a fundamentally different approach from Liskell in achieving its aims.
+        Liskell is implemented on top of the GHC API and the project is at least a few times larger in code size than Hasp.
+        By comparison, Hasp is more like a parasite that can move fluidly between hosts, and this analogy applies at multiple levels,
+        you don't even need to run Hasp on the same machine as the Haskell compiler.
+        At a more concrete level, Hasp can work on at least two different Scheme interpreters and the <a href="#install">install</a> script
+        allows installation on other Schemes after a few more questions.
+        Hasp is even more flexible in which Haskell interpreters its code can run on - all of them.
+        Because Hasp deals in Haskell code and not Haskell parse trees, you can feasibly use Hasp with
+        even the most experimental Haskell interpreters.
+      </p>
+      <p>
+        The most important advantage of Hasp over Liskell is that it is implemented outside of the Haskell compiler,
+        so you can write Hasp code, compile it to Haskell code and run it in pretty much any Haskell interpreter.
+        With Hasp, you are closer to the Haskell - if you are unsure of what your Hasp code looks like to Haskell, you can test it out in <a href="#hasps">hasps</a>.
+      </p>
+      <p>
+        The most important disadvantage of Hasp over Liskell is that due to the abstracted nature of Hasp's meta-programming stage,
+        true gensyms are not possible. Obviously, we don't think this is a show-stopper, see <a href="#limitations">limitations</a> for more info.
+      </p>
+      <p>Hasp is more similar to Haskell and Liskell is more similar to the Lisps (Scheme in particular).</p>
+    </div>
+    <div class="section" id="philosophy">
+      <h2>Philosophy</h2>
+      <p>
+        Hasp aims to be extremely open and hackable and it is hoped you will see this reflected throughout the project,
+        from the pipeable command-line tools, to the interpreter hooks, to the semantic markup you are viewing now.
+      </p>
+      <p>
+        This project wants to prove that you don't need to do heavy stuff like hack compilers to implement a meta-programming language.
+        This project wants to create tools that leverage the powerful UNIX philosophy of using standard input and output to provide modular interfaces.
+        Hasp believes that meta-programming is an easy problem and should have a simple solution.
+        At less than 1000 LOC, Hasp is appropriately small and this increases both its maintainability and ease of modification.
+      </p>
+      <p>
+        Both the Lisp reader and the Haskell interpreter have already been invented - Hasp's job is to suitably combine them into a rich and powerful language.
+      </p>
+    </div>
+    <div class="section" id="indentation">
+      <h2>Indentation reading</h2>
+      <p>
+        A bonus to some and despised by others, Hasp code can also be interpreted by indentation.
+        The <a href="#install">install</a> script will ask if you want to enable indentation reading and sets everything up accordingly.
+        So for those wanting to use indentation, here is an example:
+      </p>
+<pre>
+<a href="#def">def</a> (numStep v s)
+  <a href="#letl">letl</a> (numStep- (n 0))
+    <a href="#cons">cons</a> (+ s (* n v)) (numStep- (<a href="#inc">inc</a> n))
+</pre>
+      <p>
+        Note that once inside a list, the reader is no longer indentation-based. For example:
+      </p>
+<pre>
+;; This code does not work as expected.
+
+(<a href="#def">def</a> (numStep v s)
+  <a href="#letl">letl</a> (numStep- (n 0))
+    <a href="#cons">cons</a> (+ s (* n v)) (numStep- (<a href="#inc">inc</a> n)))
+</pre>
+      <p>
+        The above code is not equivalent to the first example,
+        because this form is read as a normal Lisp expression by the Lisp reader.
+        This behaviour means you can compile some fully parenthesised Hasp code using Hasp with indentation enabled, and it'll still work fine.
+      </p>
+      <p>
+        Scheme style block comments (<code>#| comment ... |#</code>) are allowed,
+        but they must begin on their own line at the right indentation level for the following statement.
+        Single line Scheme comments (<code>; comment ...\n</code>) are allowed anywhere and will be ignored by the reader.
+      </p>
+    </div>
+    <div class="section" id="download">
+      <h2><a href="http://www-student.cs.york.ac.uk/~anc505/code/hasp/hasp.tar.gz">Download</a></h2>
+      <p>You can also pick up the latest code from source control:</p>
+      <pre>svn checkout http://hasp.googlecode.com/svn/trunk/ hasp</pre>
+      <p>The tarball is only slightly more stable and will also be updated fairly often.</p>
+      <p>Send any comments, suggestions and questions to <a href="mailto:anc505@york.ac.uk">anc505@york.ac.uk</a></p>
+    </div>
+    <div class="section" id="limitations">
+      <h2>Limitations</h2>
+      <p>
+        Because Hasp is a completely separate phase from running a Haskell program,
+        it cannot implement true gensyms, which Liskell can do.
+        Instead, Hasp uses appropriately random variable names, such as <code>s_gensym_20</code>.
+        This is a bit of a hack, but unless you are in the habit of using ugly variable names,
+        it should not affect you. The prefixes used are <code>s_gensym_</code> and <code>T_gensym_</code>,
+        so you should not begin any variables with these characters.
+      </p>
+      <p>Here are the bullet-proof rules to using Hasp gensyms safely:</p>
+      <ul>
+        <li>Do not interface with Haskell code which defines variable or type names beginning with <code>s_gensym_</code> or <code>T_gensym_</code> respectively.</li>
+        <li>If you define a generated name to the top level, do it inside a <a href="#module">module</a> declaration and do not export the name.</li>
+      </ul>
+      <p>
+        Hasp also needs to know about what is infix for Haskell and what isn't.
+        If you are interfacing with non-standard Haskell defined as infix,
+        you should add the code <code>(definfix myop)</code> to <a href="#usr-macros.scm">usr-macros.scm</a>,
+        where <code>myop</code> is the name of the operator,
+        and then continue to use it as an ordinary prefix procedure.
+      </p>
+    </div>
+    <div class="section" id="installation">
+      <h2>Installation</h2>
+      <p>
+        Hasp provideds a basic <a href="#install">install</a> script in the project's <code>bin</code> directory
+        which should be able to automate a few configuration things for you.
+        (This script doesn't move files around, it is not analagous to <code>make install</code>.)
+      </p>
+      <pre>$ bin/<a href="#install">install</a></pre>
+      <p>
+        Hopefully this'll work fine. If that fails, <a href="mailto:anc505@york.ac.uk">email</a> and I'll be happy to help.
+      </p>
+    </div>
+    <div class="section" id="blog">
+      <h2><a href="http://hasp-code.blogspot.com/">Blog</a></h2>
+      <p>Keep up-to-date on progress by subscribing to the <a href="http://hasp-code.blogspot.com/feeds/posts/default">feed</a>.</p>
+    </div>
+    <div class="section" id="tutorial">
+      <h2><a href="lunch.html">Hasp in a Lunch Break!</a></h2>
+      <p>A gentle guide to getting up and running with Hasp.</p>
+    </div>
+    <div class="section" id="notes">
+      <h2>Notes</h2>
+      <ul>
+        <li>
+          Hasp does not allow variable names to end in a single quote, eg. <code>foldl'</code>.
+          If you want to refer to the Haskell variable <code>foldl'</code>, you would type <code>foldl-</code>.
+        </li>
+        <li>
+          Hasp is a completely prefix language. Because of this, <code>+</code> can now be used as a first-class value like any other function.
+          However this means that Hasp needs knowledge of what the <a href="#expressions">initial infix operators</a> are, and produces less readable Haskell code.
+        </li>
+        <li>
+          Gotcha: Hasp uses Scheme style characters instead of Haskell style characters, eg. #\newline instead of '\n'.
+        </li>
+        <li>
+          Gotcha: Hasp outputs its code in Weak Head Normal Form, making it particularly susceptible to the Monomorphism Restriction.
+          Either disable it in GHC with -XNoMonomorphismRestriction, or make sure to provide type signatures for everything (or most things at least).
+        </li>
+      </ul>
+    </div>
+    <div class="section" id="todo">
+      <h2>Todo</h2>
+      <ol>
+        <li>Cook up a macro to replace the Haskell <code>deriving</code> keyword.</li>
+        <li>Modify the reader to allow Literate Hasp.</li>
+        <li>Emacs editor mode.</li>
+        <li>
+          Possibly port the bash scripts to Hasp and provide them as Haskell code.
+        </li>
+        <li>Use gsc to provide prebuilt binaries.</li>
+      </ol>
+    </div>
+    <div class="section" id="bugs">
+      <h2>Bugs</h2>
+      <ol>
+        <li>
+          Using Gambit and GHCi 6.10 and if rlwrap is not being used,
+          after exiting <a href="#gasps">gasps</a>, typing is no longer visible in the terminal until it is closed.
+          A workaround is to use an interrupt (<code>^C</code>) to exit <a href="#gasps">gasps</a> instead of <code>EOF</code> (<code>^D</code>).
+        </li>
+      </ol>
+    </div>
+    <div class="section" id="credits">
+      <h2>Credits</h2>
+      <ul>
+        <li>
+          Thanks to <code>nanothief</code> for writing up some descriptive documentation and getting gasps to use rlwrap if available, plus general good advice.
+        </li>
+      </ul>
+    </div>
+    <div class="section" id="statements">
+      <h2>Statements</h2>
+      <p>
+        Statements are definitional forms and are not first-class values.
+      </p>
+      <p>
+        See the <a href="#typexes">typex</a> section for a list of valid <code>typex</code> forms.
+      </p>
+      <div class="subitem" id="begin">
+        <pre class="definition">(begin . forms)</pre>
+        <p>
+          <code>begin</code> allows multiple statements to be grouped together.
+          It does not denote any sequencing, and is only present in the language to
+          allow <a href="#std-macros">macros</a> to return code containing multiple statements.
+        </p>
+<pre>
+(defmac (<a href="#defn">defn</a> name typex . definitions)
+  `(begin
+    ,(if (null? typex) '(begin) `(<a href="#signature">::</a> ,name ,typex))
+    ,@(map (lambda (x) `(<a href="#def">def</a> ,(cons name (car x)) ,@(cdr x))) definitions)))
+</pre>
+      </div>
+      <div class="subitem" id="type">
+        <pre class="definition">(type name typex)</pre>
+        <p>
+          Makes <code>name</code> a synonym for the <code>typex</code>. <code>name</code> can be a symbol (with first character uppercase)
+          or a list with first element as the symbol, followed by its type parameters.
+        </p>
+        <pre>(type (ReadS a) (-> String (<a href="#List">List</a> (<a href="#tup">tup</a> a String))))</pre>
+      </div>
+      <div class="subitem" id="gadt">
+        <pre class="definition">(gadt name . signatures)</pre>
+        <p>
+          Creates a GADT. <code>name</code> can be a symbol (with first character uppercase)
+          or a list with first element as the symbol, followed by its type parameters.
+        </p>
+        <pre>(gadt Name (:: A (-> Foo Name)) (:: B (-> Bar Name)) (:: C (-> Baz Name)))</pre>
+      </div>
+      <div class="subitem" id="data">
+        <pre class="definition">(data name typex)</pre>
+        <p>
+          Creates a data type. <code>name</code> can be a symbol (with first character uppercase)
+          or a list with first element as the symbol, followed by its type parameters.
+        </p>
+        <pre>(data Name (union (A Foo) (B Bar) (C Baz)))</pre>
+      </div>
+      <div class="subitem" id="newtype">
+        <pre class="definition">(newtype name typex)</pre>
+        <p>
+          Creates a new data type. <code>name</code> can be a symbol (with first character uppercase)
+          or a list with first element as the symbol, followed by its type parameters.
+        </p>
+        <pre>(newtype Natural (MakeNatural Integer))</pre>
+      </div>
+      <div class="subitem" id="class">
+        <pre class="definition">(class typex . statements)</pre>
+        <p>
+          Creates a class, with any number of supplied <a href="#generals">general statements</a>.
+        </p>
+<pre>
+(class (Num a)
+  (<a href="#signature">::</a> + (-> a a a))
+  (<a href="#signature">::</a> negate (-> a a)))
+</pre>
+      </div>
+      <div class="subitem" id="instance">
+        <pre class="definition">(instance typex . statements)</pre>
+        <p>
+          Creates an instance of a class, with any number of supplied <a href="#generals">general statements</a>.
+        </p>
+        <pre>(instance (Typeable (W a)) (<a href="#def">def</a> (typeOf _) (typeOf ())))</pre>
+      </div>
+      <div class="subitem" id="module">
+        <pre class="definition">(module name exporting . forms)</pre>
+        <p>
+          Creates an module, where <code>exporting</code> is a list of names to be exported.
+        </p>
+<pre>
+(module Main ()
+  (<a href="#import">import</a> A)
+  (<a href="#import">import</a> B)
+  (<a href="#def">def</a> main (&gt;&gt; A.f B.f)))
+</pre>
+      </div>
+      <div class="subitem" id="import">
+        <pre class="definition">(import module . names)</pre>
+        <p>
+          Imports the supplied names from the <code>module</code>. If <code>module</code> is a list of one symbol,
+          then the symbol is used as a qualified name.
+          If <code>module</code> is a list of two symbols, then the first symbol is the module to be imported,
+          and the second is the name it is to be imported as, but the name will not be qualified.
+          If <code>module</code> is a list of one symbol and one list containing a symbol, then the first symbol is the module to be imported,
+          and the second symbol is a qualified name which the module will be imported as.
+          Additionally, if <code>names</code> comprises of a single list, then the symbols of that list will be hidden, and the rest of the module imported.
+        </p>
+        <p>
+          All import statements must appear at the top of a module definition before any other statements.
+        </p>
+        <pre>(import Prelude (lookup filter foldr)) ;; imports Prelude hiding lookup, filter, and foldr.</pre>
+      </div>
+      <div class="subitem" id="foreign">
+        <pre class="definition">(foreign . info)</pre>
+        <p>
+          Defines a foreign interface with the given <code>info</code>.
+        </p>
+        <pre>(foreign import ccall safe "prototypes.h" (<a href="#signature">::</a> c_function (IO ())))</pre>
+      </div>
+    </div>
+    <div class="section" id="expressions">
+      <h2>Expressions</h2>
+      <p>
+        Expression forms are only found within a statement form. Prefix definitions are provided for the
+        following Haskell infix expressions:
+      </p>
+      <pre>: !! $ $! &amp;&amp; * ** + ++ - / /= &lt; &lt;= == =&lt;&lt; > >= >> >>= ^ ^^ :+ ! o or-</pre>
+      <p>(<code>o</code> is the Hasp name for Haskell's composition operator <code>.</code> and <code>or-</code> likewise for Haskell's <code>||</code>.</p>
+      <p>
+        These are completely first class and do not need to be wrapped in parenthesis.
+        ie. you could write <code>(map + (<a href="#list">list</a> 1 2 3 4))</code> to return a list of partial <code>+</code> closures.
+      </p>
+      <p>
+        If you supply more than two arguments to one of the above operators, the arguments will be applied with right association,
+        eg. <code>(+ 1 2 3)</code> is the same as <code>(+ 1 (+ 2 3))</code>.
+      </p>
+      <p>
+        Hasp doesn't have <code>n+k</code> patterns, but infix constructors like the cons operator <code>:</code> can be used in patterns.
+      </p>
+      <div class="subitem" id="let">
+        <pre class="definition">(let declarations . forms)</pre>
+        <p>
+          <code>declarations</code> can be any number of <a href="#generals">general statements</a>.
+          <code>forms</code> can be any number of <a href="#generals">general statements</a>, followed by an expression.
+          Any general statements preceding the final expression will be added to the declarations of the <code>let</code> form.
+          The final expression is evaluated within the scope of the declarations.
+          If there are no declarations or statements, the expression is simply evaluated without a <code>let</code> form.
+        </p>
+        <pre>(let ((<a href="#def">def</a> dolly breedSheep)) (foo dolly))</pre>
+      </div>
+      <div class="subitem" id="case-of">
+        <pre class="definition">(case-of x . forms)</pre>
+        <p>
+          Pattern matches <code>x</code> against the patterns held in the head of each <code>form</code> in <code>forms</code>.
+          If the match succeeds, then the rest of the <code>form</code> is returned as a let expression (allowing definitional forms before a return value).
+        </p>
+<pre>
+(case-of (<a href="#tup">tup</a> a b c)
+  ((<a href="#tup">tup</a> True  x _) (<a href="#def">def</a> value x) value) ; def forms are allowed and will be grouped into a let expression.
+  ((<a href="#tup">tup</a> False _ y) y))
+</pre>
+      </div>
+      <div class="subitem" id="fn">
+        <pre class="definition">(fn formals . forms)</pre>
+        <p>
+          <code>fn</code> behaves much like the <code>lambda</code> of other languages.
+          <code>formals</code> can be a list or a single variable symbol, and can contain pattern matching syntax such as <a href="#tup">tuples</a>.
+          <code>forms</code> can be any number of <a href="#generals">general statements</a>, followed by an expression.
+          Any <a href="#generals">general statements</a> preceding the final expression will be placed in a <a href="#let">let</a> form around the expression.
+        </p>
+        <pre>(fn (a b) (+ a b))</pre>
+      </div>
+      <div class="subitem" id="tup">
+        <pre class="definition">(tup . items)</pre>
+        <p>
+          Creates a tuple of fixed size containing the items, which can be of different types.
+          <code>tup</code> forms can be used both within pattern-matching and type signatures, as well as normal code.
+        </p>
+        <pre>(tup (+ 1 2) 3 4)</pre>
+      </div>
+    </div>
+    <div class="section" id="typexes">
+      <h2>Typexes</h2>
+      <p>A typex can be any of these forms, or it can be a symbol, or a parameterised type, or a <a href="#tup">tup</a> of typexes.</p>
+      <div class="subitem" id="right-arrow">
+        <pre class="definition">(-> . typexes)</pre>
+        <p>
+          <code>-&gt;</code> is defined to work as an infix operator,
+          but should only be used within type signatures.
+        </p>
+        <pre>(:: comb (-> (Maybe a) (-> a (Maybe b)) (Maybe b)))</pre>
+      </div>
+      <div class="subitem" id="union">
+        <pre class="definition">(union . typexes)</pre>
+        <p>
+          Can be used in a <a href="#data">data</a> form to denote a union type.
+        </p>
+        <pre>(<a href="#data">data</a> Name (union (A Foo) (B Bar) (C Baz)))</pre>
+      </div>
+      <div class="subitem" id="context-arrow">
+        <pre class="definition">(=> context typex)</pre>
+        <p>
+          <code>context</code> is a list which can contain any number of type parameters referred to by the form.
+          For example, take the following code:
+        </p>
+        <pre>(<a href="#signature">::</a> to (<a href="#context-arrow">=></a> ((Num a) (Ord a)) (-> a a (<a href="#List">List</a> a))))</pre>
+        <p>
+          Here, the list <code>((Num a) (Ord a))</code> is a context.
+          It specifies that the type variable <code>a</code> must be an instance of class Num and of class Ord.
+          The rest of the form is now able to use the type variable <code>a</code> in its definition.
+          A context may simply be the empty list if there is no context.
+        </p>
+      </div>
+      <div class="subitem" id="forall">
+        <pre class="definition">(forall types typex)</pre>
+        <p>
+          <code>types</code> can either be a list of type variables or just a symbol for one type variable.
+        </p>
+        <pre>(forall a (<a href="#context-arrow">=></a> ((Show a)) (MkT- a)))</pre>
+      </div>
+      <div class="subitem" id="strict">
+        <pre class="definition">(strict typex)</pre>
+        <p>
+          Defines the given <code>typex</code> to be strictly evaluating.
+        </p>
+        <pre>(strict (STList a))</pre>
+      </div>
+    </div>
+    <div class="section" id="generals">
+      <h2>General</h2>
+      <p>
+        These can be either <a href="#expressions">expressions</a> or <a href="#statements">statements</a> depending on where they are placed.
+      </p>
+      <div class="subitem" id="def">
+        <pre class="definition">(def formals . forms)</pre>
+        <p>
+          Defines a function. <code>formals</code> can be either a symbol naming the function,
+          or a list with name as first element, followed by formal arguments and any pattern matches.
+          <code>forms</code> can be any number of <a href="#generals">general statements</a>, followed by an expression.
+          Any general statements preceding the final expression will be placed in a <a href="#let">let</a> form around the expression.
+        </p>
+<pre>
+(def (f x)
+  (def (g y) (* 2 y))
+  (- (g x) 3))
+</pre>
+      </div>
+      <div class="subitem" id="signature">
+        <pre class="definition">(:: object typex)</pre>
+        <p>
+          Specifies a type for the given <code>object</code>. <code>object</code> can be the name of a value or the value itself.
+        </p>
+        <pre>(:: comb (-> (Maybe a) (-&gt; a (Maybe b)) (Maybe b)))</pre>
+      </div>
+    </div>
+    <div class="section" id="hooks">
+      <h2>Hooks</h2>
+      <p>These are forms specifically intended for the compiler / interpreter and not the language.</p>
+      <div class="subitem" id="hs">
+        <pre class="definition">(:hs . codes)</pre>
+        <p>
+          <code>codes</code> can be strings or anything convertible to string, which will not be compiled
+          but instead printed unchanged. This allows to directly inline Haskell code.
+        </p>
+        <pre>(:hs ".")</pre>
+      </div>
+      <div class="subitem" id="scm">
+        <pre class="definition">(:scm . forms)</pre>
+        <p>
+          <code>forms</code> are Scheme code to be evaluated at compile time. If Hasp is running
+          over an interpreter, this allows easy access to the underlying Scheme.
+          A <a href="#tup">tuple</a> is returned with the values of <code>forms</code>.
+        </p>
+        <pre>(:scm (map (lambda (x) (* x x)) '(1 2 3 4 5))) ;; outputs ([1, 4, 9, 16, 25])</pre>
+      </div>
+      <div class="subitem" id="hload">
+        <pre class="definition">(:hload . filenames)</pre>
+        <p>
+          Compiles the given <code>filenames</code> as Hasp code and outputs the Haskell to a new filename.
+          If the input filename ends in ".hasp", the new file will have ".hasp" replaced with ".hs",
+          otherwise, ".hs" is appended to the original filename to give the new name.
+          eg. "foo.hasp" -> "foo.hs", "foo.txt" -> "foo.txt.hs".
+          <code>hload</code> will then print out a command for the Haskell interpreter to load the files.
+        </p>
+        <pre>(:hload "src/std-hasp.hasp") ;; results in src/std-hasp.hs being created with the Haskell code.</pre>
+      </div>
+    </div>
+    <div class="section" id="comments">
+      <h2>Comments</h2>
+      <p>
+        Can be used add comments to the resulting Haskell code.
+        These should only be used at the top-level, or in a <a href="#module">module</a>, <a href="#class">class</a> or <a href="#instance">instance</a> form.
+      </p>
+      <div class="subitem" id="dash-dash">
+        <pre class="definition">(-- . text)</pre>
+        <p>
+          A single line comment, with any newlines removed from the text.
+        </p>
+        <pre>(-- "These are too useful not to have.")</pre>
+      </div>
+      <div class="subitem" id="squiggle-squiggle">
+        <pre class="definition">(~~ . text)</pre>
+        <p>
+          Multi-line comments.
+        </p>
+<pre>
+(~~ "This is a
+     multi-line comment.")
+</pre>
+      </div>
+    </div>
+    <div class="section" id="std-macros">
+      <h2>Standard Macros</h2>
+      <p>Macros combine the previously defined elements of the language in new ways.</p>
+      <div class="subitem" id="=">
+        <pre class="definition">(= . forms)</pre>
+        <p>
+          Synonym for <code>def</code>.
+        </p>
+<pre>
+(= (square x) (* x x))
+
+;; is equivalent to:
+
+(def (square x) (* x x))
+</pre>
+      </div>
+      <div class="subitem" id="if">
+        <pre class="definition">(if . forms)</pre>
+        <p>
+          Synonym for <code>if-</code>.
+        </p>
+<pre>
+(if (> x 2) (/ x 2) (* x 0.2))
+
+;; is equivalent to:
+
+(if- (> x 2) (/ x 2) (* x 0.2))
+</pre>
+      </div>
+      <div class="subitem" id="list">
+        <pre class="definition">(list . items)</pre>
+        <p>
+          This creates a list of any number of items of the same type.
+        </p>
+<pre>
+(list (+ 1 2) 3 4)
+
+;; is equivalent to:
+
+(: (+ 1 2) (: 3 (: 4 Nil)))
+</pre>
+      </div>
+      <div class="subitem" id="deft">
+        <pre class="definition">(deft formals typex . forms)</pre>
+        <p>
+          Exactly the same as a <code>def</code> form except that it accepts a typex immediately after the formals.
+        </p>
+<pre>
+(deft (dec x) (=> ((Num a)) (-> a a)) (- x 1))
+
+;; is equivalent to:
+
+(<a href="#signature">::</a> dec (=> ((Num a)) (-> a a)))
+(<a href="#def">def</a> (dec x) (- x 1))
+</pre>
+      </div>
+      <div class="subitem" id="defn">
+        <pre class="definition">(defn name typex . definitions)</pre>
+        <p>
+          Defines a function denoted by symbol <code>name</code>. If <code>typex</code> is not empty,
+          it is used in a <a href="#signature">type-signature</a> form.
+          Each <code>definition</code> is a list with first element being the formal arguments of the definition,
+          and the rest of the <code>definition</code> being the function forms, as given to the <a href="#def">def</a> form.
+        </p>
+<pre>
+(defn bar (-> Int Int Int)
+  ((x 0) x)
+  ((x y) (* x y)))
+
+;; is equivalent to:
+
+(<a href="#signature">::</a> bar (<a href="#right-arrow">-></a> Int Int Int))
+(<a href="#def">def</a> (bar s_gensym_v_0 s_gensym_v_1)
+  (case-of (<a href="#tup">tup</a> s_gensym_v_0 s_gensym_v_1)
+    ((<a href="#tup">tup</a> x 0) x)
+    ((<a href="#tup">tup</a> x y) (* x y))))
+</pre>
+      </div>
+      <div class="subitem" id="let-def">
+        <pre class="definition">(let= definitions . forms)</pre>
+        <p>
+          Provides local variable binding around <code>forms</code>. <code>definitions</code> is a flat list of formals and their values.
+          The formals can be either a symbol or a list of name and formal arguments.
+          Each of these formal to value duos will be placed in a <a href="#def">def</a> form.
+          <code>forms</code> is any number of statements followed by an expression, as similar to the <a href="#let">let</a> form.
+          <code>let=</code> is similar to the <code>letrec</code> of Lisps (but without parenthesis around each variable declaration).
+        </p>
+<pre>
+(let= (x (* 2 4)
+       y (+ x 4))
+  (* x y))
+
+;; is equivalent to:
+
+(<a href="#let">let</a> ((<a href="#def">def</a> x (* 2 4))
+      (<a href="#def">def</a> y (+ x 4)))
+  (* x y))
+</pre>
+      </div>
+      <div class="subitem" id="letl">
+        <pre class="definition">(letl formal . body)</pre>
+        <p>
+          Similar to the named <code>let</code> of Scheme, except that the loop name is at the head of the variable declaration list.
+        </p>
+<pre>
+(<a href="#def">def</a> (step v s e)
+  (letl (step- (n 0))
+    (<a href="#def">def</a> next (+ s (* n v)))
+    (<a href="#if-">if-</a> (> next e) Nil (<a href="#cons">cons</a> next (step- (<a href="#inc">inc</a> n))))))
+
+;; is equivalent to:
+
+(<a href="#def">def</a> (step v s e)
+  (<a href="#let">let</a> ((<a href="#def">def</a> (step- n)
+          (<a href="#def">def</a> next (+ s (* n v)))
+          (<a href="#if-">if-</a> (> next e) Nil (<a href="#cons">cons</a> next (step- (<a href="#inc">inc</a> n))))))
+    (step- 0)))
+</pre>
+      </div>
+      <div class="subitem" id="let-do">
+        <pre class="definition">(let&gt;&gt;= definitions . forms)</pre>
+        <p>
+          This is Hasp's equivalent of do-notation. It behaves very similarly
+          to the <a href="#let-def">let=</a> notation, but for monadic types.
+          If there are more than one <code>forms</code>,
+          the behaviour is the same as with <a href="#let-def">let=</a> -
+          all but last of the forms will be grouped into a <a href="#let">let</a>
+          expression around the last form.
+        </p>
+        <p>
+          Unlike Haskell's do-notation, if a pattern binding fails,
+          this will lead to a normal pattern binding error, whereas with do-notation,
+          if a binding fails, the Monad <code>fail</code> function is called with an error string.
+          This behaviour can be reproduced by manually checking correct input values and calling <code>fail</code> if incorrect.
+        </p>
+<pre>
+(let>>= (myfile (readfilei "test")
+         a (myfile 0)
+         b (myfile 1))
+  (print (<a href="#tup">tup</a> a b)))
+
+;; is equivalent to:
+
+(>>= (readfilei "test")
+  (<a href="#fn">fn</a> (myfile)
+    (>>= (myfile 0)
+      (<a href="#fn">fn</a> (a)
+        (>>= (myfile 1)
+          (<a href="#fn">fn</a> (b)
+            (print (<a href="#tup">tup</a> a b))))))))
+</pre>
+      </div>
+      <div class="subitem" id="cond">
+        <pre class="definition">(cond . tests)</pre>
+        <p>
+          A simple wrapper around the <a href="#condList">condList</a> function,
+          to save time on typing <a href="#list">lists</a> and <a href="#tup">tuples</a>.
+          The last parameter to cond should be an expression to use if all <code>tests</code> fail.
+        </p>
+<pre>
+(cond
+  ((> a b) (<a href="#def">def</a> c (+ a 2)) (* c b))
+  ((> a 3) (* a 2))
+  (- a b))
+
+;; is equivalent to:
+
+(<a href="#condList">condList</a>
+  (<a href="#list">list</a>
+    (<a href="#tup">tup</a> (> a b) (<a href="#let">let</a> ((<a href="#def">def</a> c (+ a 2))) (* c b)))
+    (<a href="#tup">tup</a> (> a 3) (* a 2)))
+  (- a b))
+</pre>
+      </div>
+      <div class="subitem" id="case">
+        <pre class="definition">(case find . forms)</pre>
+        <p>
+          A simple wrapper around the <a href="#caseList">caseList</a> function,
+          to save time on typing <a href="#list">lists</a> and <a href="#tup">tuples</a>.
+          The last parameter to case should be an expression to use if all <code>tests</code> fail.
+          Please note that unlike Haskell's case-of syntax,
+          this form does not do pattern-matching on the left hand side,
+          it is purely a comparison.
+        </p>
+<pre>
+(case x
+  (1 "A")
+  (2 "B")
+  (3 "C")
+  "D")
+
+;; is equivalent to:
+
+(<a href="#caseList">caseList</a> x
+  (<a href="#list">list</a>
+    (<a href="#tup">tup</a> 1 "A")
+    (<a href="#tup">tup</a> 2 "B")
+    (<a href="#tup">tup</a> 3 "C"))
+  "D")
+</pre>
+      </div>
+      <div class="subitem" id="defaccessors">
+        <pre class="definition">(defaccessors name . fields)</pre>
+        <p>
+          Creates acessors for the <code>fields</code> of the data type <code>name</code>.
+          Accessors can be used with the Haskell functions <a href="#get">get</a>, <a href="#set">set</a>, <a href="#getter">getter</a> and <a href="#setter">setter</a>.
+          You can use the underscore symbol <code>_</code> in place of a field name if you don't want to define an accessor for it.
+        </p>
+<pre>
+(defaccessors Settings width height mineCount)
+
+;; is equivalent to:
+
+(def width (tup (fn ((Settings width _ _)) width) (fn ((Settings _ height mineCount) width) (Settings width height mineCount))))
+(def height (tup (fn ((Settings _ height _)) height) (fn ((Settings width _ mineCount) height) (Settings width height mineCount))))
+(def mineCount (tup (fn ((Settings _ _ mineCount)) mineCount) (fn ((Settings width height _) mineCount) (Settings width height mineCount))))
+</pre>
+      </div>
+      <div class="subitem" id="defgetters">
+        <pre class="definition">(defgetters name . fields)</pre>
+        <p>
+          Creates getters for the <code>fields</code> of the data type <code>name</code>.
+          You can use the underscore symbol <code>_</code> in place of a field name if you don't want to define a getter for it.
+        </p>
+<pre>
+(defgetters Sheep name mother father)
+
+;; is equivalent to:
+
+(def name (fn ((Sheep name _ _)) name))
+(def mother (fn ((Sheep _ mother _)) mother))
+(def father (fn ((Sheep _ _ father)) father))
+</pre>
+      </div>
+    </div>
+    <div class="section" id="haskell">
+      <h2>Standard Haskell</h2>
+      <p>
+        Hasp provides some Haskell definitions for a few things which are syntax in Haskell,
+        and a few things which are used incredibly often.
+        Remember, to use <code>foo'</code> in Hasp, you would write <code>foo-</code> instead.
+      </p>
+      <div class="subitem" id="List">
+        <pre class="definition">(type (List a) (:hs "[a]"))</pre>
+        <p>
+          This is the type constructor for a list of elements with type <code>a</code>
+          and can be used within type signatures.
+        </p>
+        <pre>(List (tup Bool a))</pre>
+        <p>
+          The symbol <code>Nil</code> is used as the unary constructor for the empty
+          list and so can be used to pattern match against an empty list, or for consing onto.
+        </p>
+        <pre>(: 1 (: 2 (: 3 Nil)))</pre>
+      </div>
+      <div class="subitem" id="inc">
+<pre class="definition">
+(<a href="#deft">deft</a> inc (<a href="#context-arrow">=></a> ((Num a)) (<a href="#right-arrow">-></a> a a)) (+ 1))
+</pre>
+        <p>
+          Increment by one.
+        </p>
+<pre>
+(inc 4)   ;; 5
+(inc 4.2) ;; 5.2
+</pre>
+      </div>
+      <div class="subitem" id="dec">
+<pre class="definition">
+(<a href="#deft">deft</a> (dec x) (<a href="#context-arrow">=></a> ((Num a)) (<a href="#right-arrow">-></a> a a)) (- x 1))
+</pre>
+        <p>
+          Decrement by one.
+        </p>
+<pre>
+(dec 6)   ;; 5
+(dec 6.7) ;; 5.7
+</pre>
+      </div>
+      <div class="subitem" id="zero">
+<pre class="definition">
+(<a href="#deft">deft</a> zero (<a href="#context-arrow">=></a> ((Num a)) (<a href="#right-arrow">-></a> a Bool)) (== 0))
+</pre>
+        <p>
+          Test whether a number is zero.
+        </p>
+<pre>
+(zero 0)   ;; True
+(zero 0.0) ;; True
+(zero 2)   ;; False
+</pre>
+      </div>
+      <div class="subitem" id="cons">
+<pre class="definition">
+(<a href="#deft">deft</a> cons (<a href="#right-arrow">-></a> a (<a href="#List">List</a> a) (<a href="#List">List</a> a)) (<a href="#hs">:hs</a> "(:)"))
+</pre>
+        <p>
+          cons is provided as an alternative name for the cons operator, <code>:</code>
+        </p>
+        <pre>(cons 1 (<a href="#list">list</a> 2 3 4))</pre>
+      </div>
+      <div class="subitem" id="if-">
+        <pre class="definition"><a href="#defn">defn</a> if- (-> Bool a a a)</pre>
+        <p>
+          Replacement for if-then-else syntax
+        </p>
+        <pre>(if- (> 3 2) "3 is greater" "3 is not greater")</pre>
+      </div>
+      <div class="subitem" id="condList">
+        <pre class="definition"><a href="#defn">defn</a> condList (-> (<a href="#List">List</a> (<a href="#tup">tup</a> Bool a)) a a)</pre>
+        <p>
+          The second argument to condList should be default value to return if all
+          of the <a href="#tup">tuple</a> Bools return False. Replacement for guard syntax.
+        </p>
+<pre>
+(condList
+  (<a href="#list">list</a>
+    (<a href="#tup">tup</a> (&gt; a b) (* a 2))
+    (<a href="#tup">tup</a> (&lt; a b) (* a 3)))
+  (- a b))
+</pre>
+      </div>
+      <div class="subitem" id="caseList">
+        <pre class="definition"><a href="#defn">defn</a> caseList (<a href="#context-arrow">=></a> ((Eq a)) (-> a (<a href="#List">List</a> (<a href="#tup">tup</a> a b)) b b))</pre>
+        <p>
+          The third argument to caseList should be default value to return if all
+          of all comparisons between the first argument and the <a href="#tup">tuple</a> value are not equal.
+          Replacement for case-of syntax.
+        </p>
+<pre>
+(caseList x
+  (<a href="#list">list</a>
+    (<a href="#tup">tup</a> 1 "A")
+    (<a href="#tup">tup</a> 2 "B")
+    (<a href="#tup">tup</a> 3 "C"))
+  "D")
+</pre>
+      </div>
+      <div class="subitem" id="Getter">
+        <pre class="definition">(type (Getter whole part) (-> whole part))</pre>
+        <p>A basic type synonym for a getter function.</p>
+      </div>
+      <div class="subitem" id="Setter">
+        <pre class="definition">(type (Setter whole part) (-> whole part whole))</pre>
+        <p>A basic type synonym for a setter function.</p>
+      </div>
+      <div class="subitem" id="Accessor">
+        <pre class="definition">(type (Accessor whole part) (tup (Getter whole part) (Setter whole part)))</pre>
+        <p>A basic type synonym for an accessor - a tuple of a getter function and a setter function.</p>
+      </div>
+      <div class="subitem" id="getter">
+        <pre class="definition">defn getter (-> (Accessor n a) (Getter n a))</pre>
+        <p>Returns the getter function of an accessor.</p>
+        <pre>((getter width) square)</pre>
+      </div>
+      <div class="subitem" id="setter">
+        <pre class="definition">defn setter (-> (Accessor n a) (Setter n a)</pre>
+        <p>Returns the setter function of an accessor.</p>
+        <pre>((setter width) square 5)</pre>
+      </div>
+      <div class="subitem" id="accessor">
+        <pre class="definition">defn accessor (-> (Getter n a) (Setter n a) (Accessor n a))</pre>
+        <p>Creates an accessor from a getter and a setter.</p>
+      </div>
+      <div class="subitem" id="get">
+        <pre class="definition">defn get (-> n (Accessor n a) a)</pre>
+        <p>Applies the getter of an accessor to a data object.</p>
+        <pre>(get square width)</pre>
+      </div>
+      <div class="subitem" id="set">
+        <pre class="definition">defn set (-> n (Accessor n a) a n)</pre>
+        <p>Applies the setter of an accessor to a data object.</p>
+        <pre>(set square width 5)</pre>
+      </div>
+    </div>
+    <div class="section" id="reader">
+      <h2>Indentation Reader</h2>
+      <p>The indentation reader provides a keyword to allow grouping of items.</p>
+      <div class="subitem" id="items">
+        <pre class="definition">items</pre>
+        <p>
+          If the indentation reader sees the <code>items</code> keyword, it will group any further indented
+          forms into one list, without the items symbol. This allows a fully indentation oriented code,
+          making it possible to write hasp code with zero parenthesis.
+          This can be useful if you have some hasp code which needs to run with indentation needed,
+          but want to put it in a sub list, without adding parenthesis to all of the inner forms.
+        </p>
+<pre>
+<a href="#let">let</a>
+  items
+    <a href="#def">def</a> bar 4
+    <a href="#def">def</a> baz (* bar 2)
+  + bar baz
+</pre>
+      </div>
+    </div>
+    <div class="section" id="scripts">
+      <h2><a href="http://code.google.com/p/hasp/source/browse/#svn/trunk/bin">Scripts</a></h2>
+      <p>Found in the <code>bin</code> subdirectory</p>
+      <div class="subitem" id="hasps">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/bin/hasps">hasps</a></pre>
+        <p>
+          <code>hasps</code> reads a Hasp expression from standard input,
+          and prints the equivalent Haskell code to standard output in a single line.
+          The <code>hasps</code> script supplied by default uses the Gambit interpreter, gsi.
+          If you are using another Scheme interpreter, please edit the <code>hasps</code>
+          script accordingly, or run the <a href="#install">install</a> script.
+          <code>hasps</code> uses the <a href="#indentation">indentation reader</a> by default but this can also be changed.
+          <code>hasps</code> will use <a href="http://utopia.knoware.nl/~hlub/uck/rlwrap/">rlwrap</a> if you have it.
+        </p>
+        <p>
+          <code>hasps</code> automatically loads <a href="#sugar-read.scm">sugar-read.scm</a> and the <a href="#std-macros.scm">std</a> and <a href="#usr-macros.scm">usr</a> macro files.
+        </p>
+        <p>
+          You can run <code>bin/hasps</code> without redirection to test out
+          bits of Hasp code and see the Haskell code it produces.
+        </p>
+      </div>
+      <div class="subitem" id="fasps">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/bin/fasps">fasps</a></pre>
+        <p>
+          <code>fasps</code> is very similar to <a href="#hasps">hasps</a>, but is intended for taking input
+          from files and passing output to files. It prints newlines in its output
+          and does not finish reading an expression until it starts reading the next one.
+        </p>
+        <p>You can use <code>fasps</code> to compile files at the command line, eg.</p>
+<pre>$ bin/fasps &lt; <a href="http://code.google.com/p/hasp/source/browse/trunk/test/sheep.hasp">test/sheep.hasp</a> &gt; <a href="http://code.google.com/p/hasp/source/browse/trunk/test/sheep.hs">test/sheep.hs</a></pre>
+      </div>
+      <div class="subitem" id="gasps">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/bin/gasps">gasps</a></pre>
+        <p>
+          <code>gasps</code> passes its standard input to <a href="#hasps">hasps</a> and
+          pipes the standard output from <a href="#hasps">hasps</a> into GHCi (or another interpreter),
+          so you can still use your Haskell interpreter with Hasp.
+          If you use Hugs or another interpreter, you can
+          specify to use that instead in the <a href="#install">install</a> script.
+          <code>gasps</code> will use <a href="http://utopia.knoware.nl/~hlub/uck/rlwrap/">rlwrap</a> if you have it.
+        </p>
+        <p>
+          For interactive testing, open a prompt and do:
+        </p>
+        <pre>$ bin/gasps</pre>
+        <p>
+          This should act like a normal GHCi / Hugs session, but using Hasp code.
+          For interpreter commands, like <code>:load foo.hs</code>, use <code>(:load "foo.hs")</code>.
+        </p>
+        <p>
+          Gotcha: While testing at the REPL, you may want to take input, eg. with:
+        </p>
+        <pre>Hasp> (>>= (getLine) putStr)</pre>
+        <p>
+          However, since anything you input is interpreted as Hasp code,
+          you can't simply enter a line, you have to wrap it with <a href="#hs">:hs</a>,
+          like so:
+        </p>
+<pre>
+Hasp> (>>= (getLine) putStr)
+(<a href="#hs">:hs</a> "this is foo")
+this is foo
+</pre>
+      </div>
+      <div class="subitem" id="install">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/bin/install">install</a></pre>
+        <p>
+          <code>install</code> asks a couple of questions and tries to generate
+          the <a href="#fasps">fasps</a>, <a href="#hasps-helper">hasps-helper</a>, <a href="#gasps-helper">gasps-helper</a>, and <a href="#preload.scm">preload.scm</a> files automagically.
+        </p>
+      </div>
+      <div class="subitem" id="hasps-helper">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/bin/hasps-helper">hasps-helper</a></pre>
+        <p>
+          Separate script used by <code>hasps</code> allow it to be rlwrapped if available.
+        </p>
+      </div>
+      <div class="subitem" id="gasps-helper">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/bin/gasps-helper">gasps-helper</a></pre>
+        <p>
+          Separate script used by <code>gasps</code> allow it to be rlwrapped if available.
+        </p>
+      </div>
+      <div class="subitem" id="hasp-build-load-file">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/bin/hasp-build-load-file">hasp-build-load-file</a></pre>
+        <p>
+          Used by <code>hasps</code> and <code>fasps</code> to combine the main source files into one source file, <a href="#load-file.scm">load-file.scm</a>,
+          which can then be loaded by the Scheme interpreter, removing the need to change directory beforehand.
+        </p>
+      </div>
+    </div>
+    <div class="section" id="sources">
+      <h2><a href="http://code.google.com/p/hasp/source/browse/#svn/trunk/src">Source files</a></h2>
+      <div class="subitem" id="macros.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/macros.scm">macros.scm</a></pre>
+        <p>
+          <code>macros.scm</code> contains some Scheme macros used by
+          <code>hasp.scm</code>, <code>std-macros.scm</code>, and <code>usr-macros.scm</code>.
+        </p>
+      </div>
+      <div class="subitem" id="hasp.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/hasp.scm">hasp.scm</a></pre>
+        <p>
+          <code>hasp.scm</code> contains the Scheme procedure <code>compile</code>
+          which converts a Hasp expression to Haskell code.
+          It also contains the procedure <code>acc</code> to create a new Haskell file
+          with code generated from an inputted Hasp file.
+          <code>hasp.scm</code> uses 5 implementation-specific procedures:
+          <code>(make-table)</code>, <code>(table-ref table key)</code>, <code>(table-set! table key value)</code>,
+          <code>(force-output port)</code>, and <code>(include filepath)</code>.
+          If these are not defined by your implementation,
+          please make sure you define them appropriately before-hand
+          (the <a href="#preload.scm">preload.scm</a> file is specifically used for this purpose).
+          The <a href="#install">install</a> script tries to do this for you.
+          If you don't have an equivalent <code>force-output</code> procedure, you can
+          use <code>(lambda x x)</code> instead, but the <a href="#gasps">gasps</a> script might not work properly.
+        </p>
+      </div>
+      <div class="subitem" id="acc-term.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/acc-term.scm">acc-term.scm</a></pre>
+        <p>
+          <code>acc-term.scm</code> contains something like
+          <code>(acc-flat (current-input-port) (current-output-port) user-reader)</code>
+          and is used by <a href="#hasps">hasps</a> to help provide a command-line interface to Hasp.
+        </p>
+      </div>
+      <div class="subitem" id="acc-file.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/acc-file.scm">acc-file.scm</a></pre>
+        <p>
+          <code>acc-file.scm</code> is very similar to <code>acc-term.scm</code>, but is used by <a href="#fasps">fasps</a>
+          instead, so it will not flatten its output.
+        </p>
+      </div>
+      <div class="subitem" id="std-macros.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/std-macros.scm">std-macros.scm</a></pre>
+        <p>
+          <code>std-macros.scm</code> contains some basic Hasp macros that
+          Hasp users are likely to want to use in their code.
+        </p>
+      </div>
+      <div class="subitem" id="usr-macros.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/usr-macros.scm">usr-macros.scm</a></pre>
+        <p>
+          <code>usr-macros.scm</code> contains your own Hasp macros, make it up as you go along.
+          See <code>std-macros.scm</code> for examples of how to write Hasp macros.
+        </p>
+      </div>
+      <div class="subitem" id="sugar-read.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/sugar-read.scm">sugar-read.scm</a></pre>
+        <p>
+          <code>sugar-read.scm</code> contains an indentation-aware read procedure.
+          See <a href="http://srfi.schemers.org/srfi-49/srfi-49.html">SRFI 49</a> for details.
+          Please note however that the reader provided has been heavily modified with improvements.
+        </p>
+      </div>
+      <div class="subitem" id="preload.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/preload.scm">preload.scm</a></pre>
+        <p>
+          <code>preload.scm</code> should contain aliases to implementation specific procedures:
+          <code>make-table</code>, <code>table-set!</code>, <code>table-ref</code>, <code>force-output</code>, and <code>include</code>,
+          plus a definition of <code>define-macro</code> if it is not already defined.
+          The <a href="#install">install</a> script will try to autogenerate this file.
+        </p>
+      </div>
+      <div class="subitem" id="load-file.scm">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/load-file.scm">load-file.scm</a></pre>
+        <p>
+          Is used by <a href="hasp-build-load-file">hasp-build-load-file</a> to store the bulk of the Scheme source code for loading.
+        </p>
+      </div>
+      <div class="subitem" id="std-hasp.hasp">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/std-hasp.hasp">std-hasp.hasp</a></pre>
+        <p>
+          <code>std-hasp.hasp</code> produces <code>std-hasp.hs</code>
+        </p>
+      </div>
+      <div class="subitem" id="std-hasp.hs">
+        <pre class="definition"><a href="http://code.google.com/p/hasp/source/browse/trunk/src/std-hasp.hs">std-hasp.hs</a></pre>
+        <p>
+          <code>std-hasp.hs</code> defines Haskell functions for things which are syntax in Haskell,
+          but probably shouldn't be (such as the if-then-else statement).
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

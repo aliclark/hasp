@@ -1,0 +1,139 @@
+#!/bin/bash
+
+CURDIR=$(dirname "$0")
+FORCE_OUTPUT='(lambda x x)'
+MAKE_TABLE=''
+TABLE_SET=''
+TABLE_REF=''
+DEFINE_MACRO=''
+FILE_ACC="acc-sugar"
+USER_READER="read"
+
+SCHEME_HASPS="gsi \$(dirname \"\$0\")/../src/preload.scm \
+\$(dirname \"\$0\")/../src/sugar-read.scm \
+\$(dirname \"\$0\")/../src/load-file.scm \
+\$(dirname \"\$0\")/../src/acc-term.scm"
+
+SCHEME_FASPS="gsi \$(dirname \"\$0\")/../src/preload.scm \
+\$(dirname \"\$0\")/../src/sugar-read.scm \
+\$(dirname \"\$0\")/../src/load-file.scm \
+\$(dirname \"\$0\")/../src/acc-file.scm"
+
+hasps_script () {
+  echo -e "#!/bin/bash\n\n\
+if [ \$# != 0 ]; then\n\
+  echo 'hasps is a simple script which takes a Hasp expression as input\\nfollowed by a blank line, and outputs Haskell code on a single line.\\nhasps is intended for testing Hasp code at the REPL,\\nand the output of hasps can be conveniently piped into a Haskell interpreter\\n(this is exactly what the gasps script does).\\neg. hasps | ghci\\n'\n\
+else\n\
+  \$(dirname \"\$0\")/hasp-build-load-file\n\n\
+  $1\n\
+fi\n"
+}
+
+fasps_script () {
+  echo -e "#!/bin/bash\n\n\
+if [ \$# != 0 ]; then\n\
+  echo -e 'fasps is a simple script which takes a Hasp expression\\n(which can be spaced over multiple lines) as input,\\nand outputs Haskell code, possibly over multiple lines,\\nonce it has started reading the next expression.\\nfasps is intended for use in compiling Hasp files to Haskell,\\neg. fasps < foo.hasp > foo.hs\\n'\n\
+else\n\
+  \$(dirname \"\$0\")/hasp-build-load-file\n\n\
+  $1\n\
+fi\n"
+}
+
+echo "Which Haskell interpreter do you use? (eg. ghci, hugs)"
+echo "(If you don't have one, just hit enter)"
+read hsint
+if [ -n $hsint ]; then
+  echo -e "#!/bin/bash\n\n\
+if [ \$# != 0 ]; then\n\
+  echo -e 'gasps is a very simple glue script which\\nruns hasps and pipes its output into a Haskell interpreter.'\n\
+else\n\
+  \$(dirname \"\$0\")/hasps-helper | $hsint \$(dirname \"\$0\")/../src/std-hasp.hs\n\
+fi\n" > $CURDIR/gasps-helper
+  chmod +x $CURDIR/gasps-helper
+fi
+
+echo "Do you want Hasp to be able to read by indentation at the prompt? (Y/n)"
+echo "(This requires a newline to be entered after each form."
+echo " More details here: http://srfi.schemers.org/srfi-49/srfi-49.html)"
+read indenter
+if [ -z $indenter ] || [ $indenter = "Y" ] || [ $indenter = "yes" ] || [ $indenter = "y" ];
+then
+  USER_READER="sugar-read"
+fi
+
+echo "Which Scheme interpreter do you use? (eg. gambit, guile) "
+read scint
+
+case $scint in
+  "gambit") ;;
+  "gsi") ;;
+
+  "")
+echo "Please run this script again when you have one. \
+If you don't know which one to get, \
+gambit (http://www.iro.umontreal.ca/~gambit/) is a good choice."
+;;
+
+  "guile")
+FORCE_OUTPUT='force-output'
+MAKE_TABLE='make-hash-table'
+TABLE_SET='hashq-set!'
+TABLE_REF='hashq-ref'
+
+SCHEME_HASPS="guile -l \$(dirname \"\$0\")/../src/preload.scm \
+-l \$(dirname \"\$0\")/../src/sugar-read.scm \
+-l \$(dirname \"\$0\")/../src/load-file.scm \
+-s \$(dirname \"\$0\")/../src/acc-term.scm"
+
+SCHEME_FASPS="guile -l \$(dirname \"$\0\")/../src/preload.scm \
+-l \$(dirname \"\$0\")/../src/sugar-read.scm \
+-l \$(dirname \"\$0\")/../src/load-file.scm \
+-s \$(dirname \"\$0\")/../src/acc-file.scm"
+;;
+
+  *)
+echo "Sorry, we don't have settings for that yet, just a few more questions..."
+echo -e "What is the name of your hash table constructor? \c "
+read MAKE_TABLE
+echo -e "What is the name of your hash table getter? \c "
+read TABLE_REF
+echo -e "What is the name of your hash table setter? \c "
+read TABLE_SET
+echo -e "What is your procedure to flush a port's output? \c "
+read FORCE_OUTPUT
+echo -e "defmacro or define-macro? (define-macro preferred) \c "
+read DEFINE_MACRO
+echo "Thanks. I'd be grateful if you email those answers to anc505@york.ac.uk \
+so I can add them automatically in future."
+echo "You will also need to edit the hasps and fasps scripts so they load your interpreter"
+;;
+esac
+
+if [[ $DEFINE_MACRO = "defmacro" ]]; then
+  DEFINE_MACRO="\
+(defmacro define-macro (formals . body)\n\
+  \`(defmacro ,(car formals) ,(cdr formals) ,@body))"
+fi
+
+if [[ -n $MAKE_TABLE ]]; then
+  echo -e \
+"\n(define make-table $MAKE_TABLE)\
+\n(define table-set! $TABLE_SET)\
+\n(define table-ref $TABLE_REF)\
+\n(define include load)\
+\n$DEFINE_MACRO\
+\n(define force-output $FORCE_OUTPUT)\n" > $CURDIR/../src/preload.scm
+else
+  echo "" > $CURDIR/../src/preload.scm
+fi
+
+echo "(define file-acc (lambda x (apply $FILE_ACC x)))" >> $CURDIR/../src/preload.scm
+echo "(define user-reader (lambda x (apply $USER_READER x)))" >> $CURDIR/../src/preload.scm
+
+hasps_script "$SCHEME_HASPS" > $CURDIR/hasps-helper
+fasps_script "$SCHEME_FASPS" > $CURDIR/fasps
+chmod +x $CURDIR/hasps-helper
+chmod +x $CURDIR/fasps
+
+echo "Done!"
+
