@@ -1,7 +1,0 @@
-#!/bin/bash
-
-cat $(dirname "$0")/../src/macros.scm      > $(dirname "$0")/../src/load-file.scm
-cat $(dirname "$0")/../src/hasp.scm       >> $(dirname "$0")/../src/load-file.scm
-cat $(dirname "$0")/../src/std-macros.scm >> $(dirname "$0")/../src/load-file.scm
-cat $(dirname "$0")/../src/usr-macros.scm >> $(dirname "$0")/../src/load-file.scm
-
