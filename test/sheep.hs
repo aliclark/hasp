@@ -20,12 +20,12 @@ father = (\(Sheep _ _ father) -> father);
 
 -- we show sheep by name
 instance Show Sheep where {
-  show = (\s -> (show (name s)));
+  show = ((.) show name);
 };
 
 -- comb is a combinator for sequencing operations that return Maybe
 comb :: ((->) (Maybe a) ((->) ((->) a (Maybe b)) (Maybe b)));
-comb = (\s_gensym_v_18 -> (\s_gensym_v_19 -> (case (s_gensym_v_18, s_gensym_v_19) of {
+comb = (\s_gensym_v_0 -> (\s_gensym_v_1 -> (case (s_gensym_v_0, s_gensym_v_1) of {
   (Nothing, _) -> Nothing;
   ((Just x), f) -> (f x);})));
 

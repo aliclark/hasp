@@ -16,7 +16,7 @@ data Sheep (Sheep String (Maybe Sheep) (Maybe Sheep))
 defgetters Sheep name mother father
 
 -- "we show sheep by name"
-instance (Show Sheep) (def (show s) (show (name s)))
+instance (Show Sheep) (def show (o show name))
 
 -- "comb is a combinator for sequencing operations that return Maybe"
 defn comb (-> (Maybe a) (-> a (Maybe b)) (Maybe b))
