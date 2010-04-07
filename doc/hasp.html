@@ -231,7 +231,7 @@ fact = (\s_gensym_v_0 -> (case (s_gensym_v_0) of {
     <div class="section" id="download">
       <h2><a href="http://www-student.cs.york.ac.uk/~anc505/code/hasp/hasp.tar.gz">Download</a></h2>
       <p>You can also pick up the latest code from source control:</p>
-      <pre>git clone git://github.com/aliclark/Hasp.git</pre>
+      <pre>git clone git://github.com/aliclark/hasp.git</pre>
       <p>The tarball is only slightly more stable and will also be updated fairly often.</p>
       <p>Send any comments, suggestions and questions to <a href="mailto:anc505@york.ac.uk">anc505@york.ac.uk</a></p>
     </div>
@@ -1024,10 +1024,10 @@ fact = (\s_gensym_v_0 -> (case (s_gensym_v_0) of {
       </div>
     </div>
     <div class="section" id="scripts">
-      <h2><a href="http://github.com/aliclark/Hasp/commits/master/bin/">Scripts</a></h2>
+      <h2><a href="http://github.com/aliclark/hasp/commits/master/bin/">Scripts</a></h2>
       <p>Found in the <code>bin</code> subdirectory</p>
       <div class="subitem" id="hasps">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/bin/hasps">hasps</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/bin/hasps">hasps</a></pre>
         <p>
           <code>hasps</code> reads a Hasp expression from standard input,
           and prints the equivalent Haskell code to standard output in a single line.
@@ -1046,17 +1046,17 @@ fact = (\s_gensym_v_0 -> (case (s_gensym_v_0) of {
         </p>
       </div>
       <div class="subitem" id="fasps">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/bin/fasps">fasps</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/bin/fasps">fasps</a></pre>
         <p>
           <code>fasps</code> is very similar to <a href="#hasps">hasps</a>, but is intended for taking input
           from files and passing output to files. It prints newlines in its output
           and does not finish reading an expression until it starts reading the next one.
         </p>
         <p>You can use <code>fasps</code> to compile files at the command line, eg.</p>
-<pre>$ bin/fasps &lt; <a href="http://github.com/aliclark/Hasp/commits/master/test/sheep.hasp">test/sheep.hasp</a> &gt; <a href="http://github.com/aliclark/Hasp/commits/master/test/sheep.hs">test/sheep.hs</a></pre>
+<pre>$ bin/fasps &lt; <a href="http://github.com/aliclark/hasp/commits/master/test/sheep.hasp">test/sheep.hasp</a> &gt; <a href="http://github.com/aliclark/hasp/commits/master/test/sheep.hs">test/sheep.hs</a></pre>
       </div>
       <div class="subitem" id="gasps">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/bin/gasps">gasps</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/bin/gasps">gasps</a></pre>
         <p>
           <code>gasps</code> passes its standard input to <a href="#hasps">hasps</a> and
           pipes the standard output from <a href="#hasps">hasps</a> into GHCi (or another interpreter),
@@ -1089,26 +1089,26 @@ this is foo
 </pre>
       </div>
       <div class="subitem" id="install">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/bin/install">install</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/bin/install">install</a></pre>
         <p>
           <code>install</code> asks a couple of questions and tries to generate
           the <a href="#fasps">fasps</a>, <a href="#hasps-helper">hasps-helper</a>, <a href="#gasps-helper">gasps-helper</a>, and <a href="#preload.scm">preload.scm</a> files automagically.
         </p>
       </div>
       <div class="subitem" id="hasps-helper">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/bin/hasps-helper">hasps-helper</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/bin/hasps-helper">hasps-helper</a></pre>
         <p>
           Separate script used by <code>hasps</code> allow it to be rlwrapped if available.
         </p>
       </div>
       <div class="subitem" id="gasps-helper">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/bin/gasps-helper">gasps-helper</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/bin/gasps-helper">gasps-helper</a></pre>
         <p>
           Separate script used by <code>gasps</code> allow it to be rlwrapped if available.
         </p>
       </div>
       <div class="subitem" id="hasp-build-load-file">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/bin/hasp-build-load-file">hasp-build-load-file</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/bin/hasp-build-load-file">hasp-build-load-file</a></pre>
         <p>
           Used by <code>hasps</code> and <code>fasps</code> to combine the main source files into one source file, <a href="#load-file.scm">load-file.scm</a>,
           which can then be loaded by the Scheme interpreter, removing the need to change directory beforehand.
@@ -1116,16 +1116,16 @@ this is foo
       </div>
     </div>
     <div class="section" id="sources">
-      <h2><a href="http://github.com/aliclark/Hasp/commits/master/src/">Source files</a></h2>
+      <h2><a href="http://github.com/aliclark/hasp/commits/master/src/">Source files</a></h2>
       <div class="subitem" id="macros.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/macros.scm">macros.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/macros.scm">macros.scm</a></pre>
         <p>
           <code>macros.scm</code> contains some Scheme macros used by
           <code>hasp.scm</code>, <code>std-macros.scm</code>, and <code>usr-macros.scm</code>.
         </p>
       </div>
       <div class="subitem" id="hasp.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/hasp.scm">hasp.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/hasp.scm">hasp.scm</a></pre>
         <p>
           <code>hasp.scm</code> contains the Scheme procedure <code>compile</code>
           which converts a Hasp expression to Haskell code.
@@ -1143,7 +1143,7 @@ this is foo
         </p>
       </div>
       <div class="subitem" id="acc-term.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/acc-term.scm">acc-term.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/acc-term.scm">acc-term.scm</a></pre>
         <p>
           <code>acc-term.scm</code> contains something like
           <code>(acc-flat (current-input-port) (current-output-port) user-reader)</code>
@@ -1151,28 +1151,28 @@ this is foo
         </p>
       </div>
       <div class="subitem" id="acc-file.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/acc-file.scm">acc-file.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/acc-file.scm">acc-file.scm</a></pre>
         <p>
           <code>acc-file.scm</code> is very similar to <code>acc-term.scm</code>, but is used by <a href="#fasps">fasps</a>
           instead, so it will not flatten its output.
         </p>
       </div>
       <div class="subitem" id="std-macros.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/std-macros.scm">std-macros.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/std-macros.scm">std-macros.scm</a></pre>
         <p>
           <code>std-macros.scm</code> contains some basic Hasp macros that
           Hasp users are likely to want to use in their code.
         </p>
       </div>
       <div class="subitem" id="usr-macros.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/usr-macros.scm">usr-macros.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/usr-macros.scm">usr-macros.scm</a></pre>
         <p>
           <code>usr-macros.scm</code> contains your own Hasp macros, make it up as you go along.
           See <code>std-macros.scm</code> for examples of how to write Hasp macros.
         </p>
       </div>
       <div class="subitem" id="sugar-read.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/sugar-read.scm">sugar-read.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/sugar-read.scm">sugar-read.scm</a></pre>
         <p>
           <code>sugar-read.scm</code> contains an indentation-aware read procedure.
           See <a href="http://srfi.schemers.org/srfi-49/srfi-49.html">SRFI 49</a> for details.
@@ -1180,7 +1180,7 @@ this is foo
         </p>
       </div>
       <div class="subitem" id="preload.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/preload.scm">preload.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/preload.scm">preload.scm</a></pre>
         <p>
           <code>preload.scm</code> should contain aliases to implementation specific procedures:
           <code>make-table</code>, <code>table-set!</code>, <code>table-ref</code>, <code>force-output</code>, and <code>include</code>,
@@ -1189,19 +1189,19 @@ this is foo
         </p>
       </div>
       <div class="subitem" id="load-file.scm">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/load-file.scm">load-file.scm</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/load-file.scm">load-file.scm</a></pre>
         <p>
           Is used by <a href="hasp-build-load-file">hasp-build-load-file</a> to store the bulk of the Scheme source code for loading.
         </p>
       </div>
       <div class="subitem" id="std-hasp.hasp">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/std-hasp.hasp">std-hasp.hasp</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/std-hasp.hasp">std-hasp.hasp</a></pre>
         <p>
           <code>std-hasp.hasp</code> produces <code>std-hasp.hs</code>
         </p>
       </div>
       <div class="subitem" id="std-hasp.hs">
-        <pre class="definition"><a href="http://github.com/aliclark/Hasp/commits/master/src/std-hasp.hs">std-hasp.hs</a></pre>
+        <pre class="definition"><a href="http://github.com/aliclark/hasp/commits/master/src/std-hasp.hs">std-hasp.hs</a></pre>
         <p>
           <code>std-hasp.hs</code> defines Haskell functions for things which are syntax in Haskell,
           but probably shouldn't be (such as the if-then-else statement).
