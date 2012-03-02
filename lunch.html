@@ -32,18 +32,18 @@
       </p>
       <pre>git clone git://github.com/aliclark/hasp.git</pre>
       <p>
-        Otherwise, download and unpack <a href="http://ali.clark.gb.net/hasp/hasp.tar.gz">the tarball</a>.
+        Otherwise, download and unpack <a href="hasp.tar.gz">the tarball</a>.
       </p>
     </div>
     <div class="section" id="setup">
       <h2>Setup Hasp</h2>
       <p>
         When you download Hasp, it'll have whatever settings I've been using recently.
-        To make sure it has the right settings for you, we run the <a href="http://ali.clark.gb.net/hasp/#install">install</a> script.
+        To make sure it has the right settings for you, we run the <a href="index.html#install">install</a> script.
       </p>
 <pre>
 cd hasp
-bin/<a href="http://ali.clark.gb.net/hasp/#install">install</a>
+bin/<a href="index.html#install">install</a>
 </pre>
         <p>
           Hasp will first ask which Haskell interpreter you are using.
@@ -62,18 +62,18 @@ bin/<a href="http://ali.clark.gb.net/hasp/#install">install</a>
     <div class="section" id="use">
       <h2>Using Hasp</h2>
       <p>
-        Now we've got Hasp all set up, we can use it! Run the <a href="http://ali.clark.gb.net/hasp/#gasps">gasps</a> script:
+        Now we've got Hasp all set up, we can use it! Run the <a href="index.html#gasps">gasps</a> script:
       </p>
-      <pre>bin/<a href="http://ali.clark.gb.net/hasp/#gasps">gasps</a></pre>
+      <pre>bin/<a href="index.html#gasps">gasps</a></pre>
       <p>
         You'll notice that it prints the same welcome message as your Haskell interpreter,
         and then loads a Haskell module called Hasp,
-        which contains some basic <a href="http://ali.clark.gb.net/hasp/#haskell">Haspy Haskell things</a>.
+        which contains some basic <a href="index.html#haskell">Haspy Haskell things</a>.
       </p>
       <p>This is slightly different from your normal Haskell interpreter though - it takes Hasp as input.</p>
       <p>Let's plunge into our hello world:</p>
 <pre>
-Hasp> (<a href="http://ali.clark.gb.net/hasp/#def">def</a> printHi (putStrLn "Hello, world!"))
+Hasp> (<a href="index.html#def">def</a> printHi (putStrLn "Hello, world!"))
 ()
 Hasp> printHi  
 Hello, world!
@@ -82,14 +82,14 @@ Hasp>
 </pre>
       <p>
         This code looks very similar to the equivalent Haskell.
-        One cool thing to note here that is that you can type <a href="http://ali.clark.gb.net/hasp/#def">def</a>
+        One cool thing to note here that is that you can type <a href="index.html#def">def</a>
         forms into the prompt and they will be available later on when you type an expression.
       </p>
       <p>
-        Just about every Hasp <a href="http://ali.clark.gb.net/hasp/#statements">statement</a>
+        Just about every Hasp <a href="index.html#statements">statement</a>
         can be entered into the top level of <code>gasps</code>.
-        <code>def</code> forms and <a href="http://ali.clark.gb.net/hasp/#signature">type signatures</a>
-        will be implicitly wrapped around any expressions entered, with a <a href="http://ali.clark.gb.net/hasp/#let">let</a> form.
+        <code>def</code> forms and <a href="index.html#signature">type signatures</a>
+        will be implicitly wrapped around any expressions entered, with a <a href="index.html#let">let</a> form.
       </p>
       <p>
         The other statements entered will be grouped into a file called <code>hasp-repl.hasp</code> in the current directory and then loaded
@@ -98,8 +98,8 @@ Hasp>
       <h3>Using hooks</h3>
       <p>
         The normal interpreter hooks can also be used via Hasp. For example, typing <code>(:?)</code> will display the help text of the interpreter.
-        Hasp provides a few additional <a href="http://ali.clark.gb.net/hasp/#hooks">hooks</a>
-        called <a href="http://ali.clark.gb.net/hasp/#hload">hload</a>, <a href="http://ali.clark.gb.net/hasp/#scm">scm</a> and <a href="http://ali.clark.gb.net/hasp/#hs">hs</a>.
+        Hasp provides a few additional <a href="index.html#hooks">hooks</a>
+        called <a href="index.html#hload">hload</a>, <a href="index.html#scm">scm</a> and <a href="index.html#hs">hs</a>.
       </p>
       <p>
         <code>hload</code> can be used for interactively loading Hasp files, eg.
@@ -153,12 +153,12 @@ $(dirname "$0")/../src/hasp/bin/gasps
         which will secondarily create a Haskell file.
       </p>
       <p>
-        Hasp also provides a script called <a href="http://ali.clark.gb.net/hasp/#fasps">fasps</a>
+        Hasp also provides a script called <a href="index.html#fasps">fasps</a>
         for compiling Hasp code at the command line. The interface is incredibly simple:
         <code>fasps</code> reads Hasp code from its standard input, and prints Haskell to its standard output.
       </p>
       <p>With this in mind, we can use redirection to compile one file into another:
-      <pre>bin/<a href="http://ali.clark.gb.net/hasp/#fasps">fasps</a> &lt; mycode.hasp > mycode.hs</pre>
+      <pre>bin/<a href="index.html#fasps">fasps</a> &lt; mycode.hasp > mycode.hs</pre>
     </div>
     <div class="section" id="macros">
       <h2>Macros</h2>
@@ -217,7 +217,7 @@ $(dirname "$0")/../src/hasp/bin/gasps
       <p>
         So we know that our macro takes the form of
         <code>(defn name typex . definitions)</code>.
-        Indeed, if you look at the docs for <a href="http://ali.clark.gb.net/hasp/#defn">defn</a>
+        Indeed, if you look at the docs for <a href="index.html#defn">defn</a>
         you'll see that this is the case.
       </p>
       <p>
