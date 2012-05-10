@@ -215,7 +215,7 @@
 (define (sugar-load filename)
   (define (load port)
     (let ((inp (sugar-read-style #t port)))
-      (if (eof-object? inp) #t (begin (eval inp) (load port)))))
+      (if (eof-object? inp) #t (begin (eval inp (interaction-environment)) (load port)))))
   (load (open-input-file filename)))
 
 (define (sugar-enable)
