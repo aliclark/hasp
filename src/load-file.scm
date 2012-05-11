@@ -551,7 +551,7 @@
   (implode ", "
     (map
       (lambda (x)
-        (let ((rv (eval x)))
+        (let ((rv (eval x (interaction-environment))))
           (if (equal? rv (cond (#f #f)))
             "()"
             (data-str rv))))

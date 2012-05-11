@@ -85,7 +85,7 @@ SCHEME_HASPS="guile -l \$(dirname \"\$0\")/../src/preload.scm \
 -l \$(dirname \"\$0\")/../src/load-file.scm \
 -s \$(dirname \"\$0\")/../src/acc-term.scm"
 
-SCHEME_FASPS="guile -l \$(dirname \"$\0\")/../src/preload.scm \
+SCHEME_FASPS="guile -l \$(dirname \"\$0\")/../src/preload.scm \
 -l \$(dirname \"\$0\")/../src/sugar-read.scm \
 -l \$(dirname \"\$0\")/../src/load-file.scm \
 -s \$(dirname \"\$0\")/../src/acc-file.scm"
